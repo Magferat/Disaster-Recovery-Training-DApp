@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>DApp Home</title>
+
+    <!-- Bootstrap CSS + JS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+
+    <!-- Web3 -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.4/dist/web3.min.js"></script>
+
+    <!-- Shared JS -->
+    <script src="./js/utils.js"></script>
+    <script src="./js/web3-init.js"></script>
+    <script src="./js/navbar.js"></script>
+</head>
+
+<body class="bg-light">
+    <div id="navbar"></div>
+
+    <main class="container py-4">
+        <div class="p-4 bg-white rounded shadow-sm">
+            <h1 class="h4 mb-3">Welcome 👋</h1>
+            <p class="text-muted">Connect your wallet and use the pages from the navbar.</p>
+
+            <div id="homeStatus" class="row g-3">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="text-muted small">Connected Account</div>
+                            <div id="homeAccount" class="fw-semibold">—</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="text-muted small">Your Role</div>
+                            <div id="homeRole" class="fw-semibold">Unconnected</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="text-muted small">Name</div>
+                            <div id="homeName" class="fw-semibold">—</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="text-muted small">Name</div>
+                            <div id="homeFee" class="fw-semibold">—</div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+
+            <hr class="my-4" />
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a class="btn btn-outline-primary w-100" href="./pages/register.html">Register</a>
+                </div>
+                <div class="col-md-3">
+                    <a class="btn btn-outline-primary w-100" href="./pages/booking.html">Book Slot</a>
+                </div>
+                <div class="col-md-3">
+                    <a class="btn btn-outline-primary w-100" href="./pages/schedules.html">View Schedules</a>
+                </div>
+                <div class="col-md-3">
+                    <a class="btn btn-outline-primary w-100" href="./pages/admin.html">Admin Panel</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        (async function init() {
+            await navbar.loadNavbar("home");
+            document.getElementById("connectBtn").click(); // auto-prompt connect for convenience
+
+            // after connect, show status
+            const wait = setInterval(async () => {
+                if (app.contract && app.account) {
+                    clearInterval(wait);
+                    await navbar.updateNavStatus();
+                    document.getElementById("homeAccount").textContent = app.account;
+                    const me = normalizeUser(await app.contract.methods.users(app.account).call());
+                    document.getElementById("homeRole").textContent = me.isRegistered ? (RoleNames[me.role] || "Unknown") : "Unregistered";
+                    document.getElementById("homeName").textContent = me.isRegistered ? (me.name || "Unknown") : "no name";
+                    // document.getElementById("homeFee").textContent = web3Helpers.fromWei(app.bookingFeeWei) + " ETH";
+                }
+            }, 200);
+        })();
+    </script>
+</body>
+
+</html>
