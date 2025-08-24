@@ -25,10 +25,26 @@ async function loadNavbar(activeKey) {
 async function updateNavStatus() {
     const roleEl = document.getElementById("navRole");
     const accEl = document.getElementById("navAccount");
-    if (!app.contract || !app.account) { roleEl.textContent = "Unconnected"; accEl.textContent = "—"; return; }
+    const adminLink = document.getElementById("navAdminLink"); // add id in navbar.html
+
+    if (!app.contract || !app.account) {
+        roleEl.textContent = "Unconnected";
+        accEl.textContent = "—";
+        if (adminLink) adminLink.style.display = "none"; // hide until connected
+        return;
+    }
+
     const me = normalizeUser(await app.contract.methods.users(app.account).call());
-    roleEl.textContent = me.isRegistered ? (RoleNames[me.role] || "Unknown") : "Unregistered";
+    const roleName = me.isRegistered ? (RoleNames[me.role] || "Unknown") : "Unregistered";
+
+    roleEl.textContent = roleName;
     accEl.textContent = app.account.slice(0, 6) + "…" + app.account.slice(-4);
+
+    // hide/show Admin link
+    if (adminLink) {
+        adminLink.style.display = (roleName === "Admin") ? "block" : "none";
+    }
 }
+
 
 window.navbar = { loadNavbar, updateNavStatus };

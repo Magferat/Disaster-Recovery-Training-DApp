@@ -40016,12 +40016,12 @@
     "1337": {
       "events": {},
       "links": {},
-      "address": "0x9561C133DD8580860B6b7E504bC5Aa500f0f06a7",
-      "transactionHash": "0xa651f0b944078c02b0d39046bc8ab8e7af9173ff560483b5ccf4f7f4bce25ce9"
+      "address": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601",
+      "transactionHash": "0x320646a711a20d6134eda5b125439ed4063370e77bf9308f1cfaaa57c1b1ee13"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2025-08-21T18:25:04.523Z",
+  "updatedAt": "2025-08-24T09:47:05.494Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",

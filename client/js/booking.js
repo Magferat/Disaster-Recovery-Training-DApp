@@ -48,9 +48,9 @@ async function showSlots() {
         btn.onclick = async () => {
             try {
                 await app.contract.methods.bookTrainingSlot(trainer, slot.startEpoch).send({ from: app.account, value: app.bookingFeeWei });
-                msg("bookMsg", "Booked ✅");
+                msg("bookMsg", "“Booking Successful”");
                 showSlots();
-            } catch (e) { msg("bookMsg", "❌ " + (e.message || e)); }
+            } catch (e) { msg("bookMsg", "“Booking Unsuccessful” " + (e.message || e)); }
         };
         row.appendChild(btn);
         wrap.appendChild(row);

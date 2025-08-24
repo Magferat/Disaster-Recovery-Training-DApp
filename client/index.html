@@ -64,18 +64,19 @@
 
             <hr class="my-4" />
 
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <a class="btn btn-outline-primary w-100" href="./pages/register.html">Register</a>
+
+            <h1 class="h5 mb-3"> Search & Sort Participants</h1>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label">Filter by District</label>
+                    <input id="searchDistrict" class="form-control mb-2" placeholder="Type district" />
+                    <button id="btnSearch" class="btn btn-outline-secondary">Search</button>
+                    <div id="searchResult" class="small mt-2"></div>
                 </div>
-                <div class="col-md-3">
-                    <a class="btn btn-outline-primary w-100" href="./pages/booking.html">Book Slot</a>
-                </div>
-                <div class="col-md-3">
-                    <a class="btn btn-outline-primary w-100" href="./pages/schedules.html">View Schedules</a>
-                </div>
-                <div class="col-md-3">
-                    <a class="btn btn-outline-primary w-100" href="./pages/admin.html">Admin Panel</a>
+                <div class="col-md-6">
+                    <label class="form-label">Counts per District</label><br />
+                    <button id="btnCountSort" class="btn btn-outline-secondary">Show Counts (sorted)</button>
+                    <div id="countResult" class="small mt-2"></div>
                 </div>
             </div>
         </div>
@@ -84,22 +85,60 @@
     <script>
         (async function init() {
             await navbar.loadNavbar("home");
-            document.getElementById("connectBtn").click(); // auto-prompt connect for convenience
+            document.getElementById("connectBtn").click();
 
-            // after connect, show status
             const wait = setInterval(async () => {
                 if (app.contract && app.account) {
                     clearInterval(wait);
                     await navbar.updateNavStatus();
+
                     document.getElementById("homeAccount").textContent = app.account;
+
                     const me = normalizeUser(await app.contract.methods.users(app.account).call());
-                    document.getElementById("homeRole").textContent = me.isRegistered ? (RoleNames[me.role] || "Unknown") : "Unregistered";
+                    const roleName = me.isRegistered ? (RoleNames[me.role] || "Unknown") : "Unregistered";
+
+                    document.getElementById("homeRole").textContent = roleName;
                     document.getElementById("homeName").textContent = me.isRegistered ? (me.name || "Unknown") : "no name";
-                    // document.getElementById("homeFee").textContent = web3Helpers.fromWei(app.bookingFeeWei) + " ETH";
+
+                    //  Wire Search & CountSort now that contract is ready
+                    document.getElementById("btnSearch").onclick = async () => {
+                        const out = document.getElementById("searchResult");
+                        const district = document.getElementById("searchDistrict").value.trim().toLowerCase();
+                        try {
+                            const parts = (await app.contract.methods.getParticipants().call({ from: app.account }))
+                                .map(normalizeUser);
+                            const filtered = parts.filter(p => p.district.toLowerCase().includes(district));
+                            out.innerHTML = filtered.length
+                                ? filtered.map(p => `
+                                <div>
+                                    ${p.name} — ${p.district} — ${InterestNames[p.training_interest]} 
+                                    — Completed: ${p.has_completed_training}
+                                    <br>Addr: ${p.wallet_addr}
+                                </div>`).join("")
+                                : "No matches";
+                        } catch (e) {
+                            msg(e);
+                        }
+                    };
+
+                    document.getElementById("btnCountSort").onclick = async () => {
+                        const out = document.getElementById("countResult");
+                        try {
+                            const parts = (await app.contract.methods.getParticipants().call({ from: app.account }))
+                                .map(normalizeUser);
+                            const map = {};
+                            parts.forEach(p => { map[p.district] = (map[p.district] || 0) + 1; });
+                            const rows = Object.entries(map).sort((a, b) => b[1] - a[1]);
+                            out.innerHTML = rows.map(([d, c]) => `<div>${d}: <strong>${c}</strong></div>`).join("");
+                        } catch (e) {
+                            msg(e);
+                        }
+                    };
                 }
             }, 200);
         })();
     </script>
+
 </body>
 
 </html>
